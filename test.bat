@@ -127,5 +127,5 @@ echo Redémarrage de l'ordinateur dans 30 secondes. >> "%LOGFILE%"
 :: Fin du script.
 exit /b
 echo [INFO] Script terminé. >> "%LOGFILE%"
-echo Merci d'avoir utilisé le script de nettoyage. >> "%LOGFILE%"
+echo Merci d'avoir utilisé le script de nettoyage %USERNAME%. >> "%LOGFILE%"
 
