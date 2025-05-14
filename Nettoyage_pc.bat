@@ -12,9 +12,6 @@ if %errorlevel% neq 0 (
     exit /b
 )
 
-:: Définit le nom de l'utilisateur courant.
-set "utilisateur=%USERNAME%"
-
 :: Définit le répertoire où se trouve le script batch.
 set "BATDIR=%~dp0"
 
@@ -44,8 +41,6 @@ set "LOGFILE=%LOGDIR%\%COMPUTERNAME%_%DATE:~6,4%-%DATE:~3,2%-%DATE:~0,2%_%TIME:~
     echo Date : %DATE%
     echo Heure : %TIME%
     echo Nom PC : %COMPUTERNAME%
-    echo Utilisateur : %USERNAME%
-    echo Version Windows : %OS%
     ver
     echo ---------------------------------------------------------------
     echo Debut du script de nettoyage
@@ -112,8 +107,8 @@ ping -n 1 www.google.com >nul 2>&1
 if %errorlevel% neq 0 (
     echo [ERREUR] Pas de connexion Internet. Les commandes suivantes pourraient echouer.
     echo [ERREUR] Pas de connexion Internet. Les commandes suivantes pourraient echouer. >> "%LOGFILE%"
-    echo %utilisateur%, veuillez verifier votre connexion Internet avant de continuer.
-    echo %utilisateur%, veuillez verifier votre connexion Internet avant de continuer. >> "%LOGFILE%"
+    echo veuillez verifier votre connexion Internet avant de continuer.
+    echo veuillez verifier votre connexion Internet avant de continuer. >> "%LOGFILE%"
 ) else (
     echo [INFO] Connexion Internet detectee.
     echo [INFO] Connexion Internet detectee. >> "%LOGFILE%"
@@ -145,7 +140,6 @@ echo Defragmentation terminee. >> "%LOGFILE%"
 (
     echo ---------------------------------------------------------------
     echo Script termine avec succes.
-    echo %utilisateur% a effectue le nettoyage.
     echo Date : %DATE%
     echo Heure : %TIME%
     echo ---------------------------------------------------------------
