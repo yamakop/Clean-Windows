@@ -1,4 +1,7 @@
 @echo off
+:: Définit l'encodage UTF-8 pour afficher correctement les caractères spéciaux.
+chcp 65001 >nul
+
 :: Désactive l'affichage des commandes dans la console pour une exécution plus propre.
 
 :: Vérifie si le script est exécuté avec des droits administratifs.
@@ -9,17 +12,29 @@ if %errorlevel% neq 0 (
     exit /b
 )
 
-:: Définit le chemin du fichier log dans le dossier temporaire de l'utilisateur.
-set "LOGFILE=%TEMP%\Script_nettoyage.log"
-:: Récupère le nom de l'utilisateur courant.
 set "utilisateur=%USERNAME%"
+set "BATDIR=%~dp0"
+set "LOGDIR=%BATDIR%log_script"
+
+if not exist "%LOGDIR%" (
+    mkdir "%LOGDIR%"
+    echo [INFO] Dossier log_script créé à : "%LOGDIR%" >> "%LOGDIR%\creation_log.txt"
+) else (
+    echo [INFO] Dossier log_script déjà existant : "%LOGDIR%" >> "%LOGDIR%\creation_log.txt"
+)
+
+for /f "tokens=2 delims=:" %%I in ('ipconfig ^| findstr /i "IPv4"') do set "IP_PC=%%I"
+set "IP_PC=%IP_PC: =%"
+
+set "LOGFILE=%LOGDIR%\%COMPUTERNAME%_%IP_PC%_nettoyage_log.txt"
+echo [INFO] Fichier log principal défini à : "%LOGFILE%" >> "%LOGDIR%\creation_log.txt"
 
 :: Initialise le fichier log avec des informations de base.
 (
     echo ================================================================
     echo                       LOG DU SCRIPT NETTOYAGE
     echo ================================================================
-    echo --- Informations système ---
+    echo --- Informations systeme ---
     echo Date : %DATE%
     echo Heure : %TIME%
     echo Nom PC : %COMPUTERNAME%
@@ -27,83 +42,104 @@ set "utilisateur=%USERNAME%"
     echo Version Windows : %OS%
     ver
     echo ---------------------------------------------------------------
-    echo Début du script de nettoyage
+    echo Debut du script de nettoyage
     echo ---------------------------------------------------------------
 ) > "%LOGFILE%"
 
 :: Désactive la mise en veille de l'écran et du disque dur pour éviter les interruptions pendant le nettoyage.
-echo Désactivation de la mise en veille de l'écran et du disque dur... >> "%LOGFILE%"
+echo Desactivation de la mise en veille de l'ecran et du disque dur...
+echo Desactivation de la mise en veille de l'ecran et du disque dur... >> "%LOGFILE%"
 powercfg -change monitor-timeout-ac 0
 powercfg -change disk-timeout-ac 0
-echo Mise en veille de l'écran et du disque dur désactivée. >> "%LOGFILE%"
-
+echo Mise en veille de l'ecran et du disque dur desactivee. >> "%LOGFILE%"
 
 :: Vérifie l'espace disque disponible sur le lecteur C:.
+echo Verification de l'espace disque disponible...
 for /f "tokens=2 delims==" %%F in ('wmic logicaldisk where "DeviceID='C:'" get FreeSpace /value') do set FreeSpace=%%F
 set /a FreeSpaceMB=%FreeSpace:~0,-6%
+echo [INFO] Espace disque libre sur C: %FreeSpaceMB% Mo
 echo [INFO] Espace disque libre sur C: %FreeSpaceMB% Mo >> "%LOGFILE%"
 if %FreeSpaceMB% lss 500 (
-    echo [AVERTISSEMENT] L'espace disque est inférieur à 500 Mo. Certaines opérations pourraient échouer. >> "%LOGFILE%"
+    echo [AVERTISSEMENT] L'espace disque est inferieur a 500 Mo. Certaines operations pourraient echouer.
+    echo [AVERTISSEMENT] L'espace disque est inferieur a 500 Mo. Certaines operations pourraient echouer. >> "%LOGFILE%"
 )
 
 :: Nettoie les fichiers temporaires pour libérer de l'espace disque.
+echo Nettoyage des fichiers temporaires...
 echo Nettoyage des fichiers temporaires... >> "%LOGFILE%"
 del /f /s /q "%temp%\*" >> "%LOGFILE%" 2>&1
 del /f /s /q "C:\Windows\Temp\*" >> "%LOGFILE%" 2>&1
 del /f /s /q "C:\Windows\Prefetch\*" >> "%LOGFILE%" 2>&1
-echo Nettoyage des fichiers temporaires terminé. >> "%LOGFILE%"
+echo Nettoyage des fichiers temporaires termine.
+echo Nettoyage des fichiers temporaires termine. >> "%LOGFILE%"
 
 :: Vide la corbeille pour libérer de l'espace disque.
+echo Nettoyage de la corbeille...
 echo Nettoyage de la corbeille... >> "%LOGFILE%"
 powershell -Command "Clear-RecycleBin -Force" >> "%LOGFILE%" 2>&1
-echo Nettoyage de la corbeille terminé. >> "%LOGFILE%"
+echo Nettoyage de la corbeille termine.
+echo Nettoyage de la corbeille termine. >> "%LOGFILE%"
 
 :: Supprime les fichiers de mise à jour Windows inutiles.
-echo Nettoyage des fichiers de mise à jour... >> "%LOGFILE%"
+echo Nettoyage des fichiers de mise a jour...
+echo Nettoyage des fichiers de mise a jour... >> "%LOGFILE%"
 net stop wuauserv >> "%LOGFILE%" 2>&1
 net stop bits >> "%LOGFILE%" 2>&1
 del /s /q "C:\Windows\SoftwareDistribution\Download\*" >> "%LOGFILE%" 2>&1
 del /s /q "%windir%\Logs\CBS\*.log" >> "%LOGFILE%" 2>&1
 net start wuauserv >> "%LOGFILE%" 2>&1
 net start bits >> "%LOGFILE%" 2>&1
-echo Nettoyage des fichiers de mise à jour terminé. >> "%LOGFILE%"
+echo Nettoyage des fichiers de mise a jour termine.
+echo Nettoyage des fichiers de mise a jour termine. >> "%LOGFILE%"
 
 :: Vide le cache DNS pour résoudre d'éventuels problèmes réseau.
+echo Vidage du cache DNS...
 echo Vidage du cache DNS... >> "%LOGFILE%"
 ipconfig /flushdns >> "%LOGFILE%" 2>&1
-echo Vidage du cache DNS terminé. >> "%LOGFILE%"
+echo Vidage du cache DNS termine.
+echo Vidage du cache DNS termine. >> "%LOGFILE%"
 
 :: Vérifie et répare les fichiers système pour garantir leur intégrité.
-echo Vérification de la connectivité Internet... >> "%LOGFILE%"
+echo Verification de la connectivite Internet...
+echo Verification de la connectivite Internet... >> "%LOGFILE%"
 ping -n 1 www.google.com >nul 2>&1
 if %errorlevel% neq 0 (
-    echo [ERREUR] Pas de connexion Internet. Les commandes suivantes pourraient échouer. >> "%LOGFILE%"
-    echo %utilisateur%, veuillez vérifier votre connexion Internet avant de continuer. >> "%LOGFILE%"
+    echo [ERREUR] Pas de connexion Internet. Les commandes suivantes pourraient echouer.
+    echo [ERREUR] Pas de connexion Internet. Les commandes suivantes pourraient echouer. >> "%LOGFILE%"
+    echo %utilisateur%, veuillez verifier votre connexion Internet avant de continuer.
+    echo %utilisateur%, veuillez verifier votre connexion Internet avant de continuer. >> "%LOGFILE%"
 ) else (
-    echo [INFO] Connexion Internet détectée. >> "%LOGFILE%"
-    echo Vérification et réparation du système... >> "%LOGFILE%"
+    echo [INFO] Connexion Internet detectee.
+    echo [INFO] Connexion Internet detectee. >> "%LOGFILE%"
+    echo Verification et reparation du systeme...
+    echo Verification et reparation du systeme... >> "%LOGFILE%"
     DISM /Online /Cleanup-Image /CheckHealth >> "%LOGFILE%" 2>&1
     DISM /Online /Cleanup-Image /ScanHealth >> "%LOGFILE%" 2>&1
     DISM /Online /Cleanup-Image /RestoreHealth >> "%LOGFILE%" 2>&1
     sfc /scannow >> "%LOGFILE%" 2>&1
-    echo Vérification et réparation du système terminées. >> "%LOGFILE%"
+    echo Verification et reparation du systeme terminees.
+    echo Verification et reparation du systeme terminees. >> "%LOGFILE%"
 )
 
 :: Lance le nettoyage du disque dur pour supprimer les fichiers inutiles.
+echo Nettoyage du disque dur...
 echo Nettoyage du disque dur... >> "%LOGFILE%"
 cleanmgr /sagerun:1 >> "%LOGFILE%" 2>&1
-echo Nettoyage du disque dur terminé. >> "%LOGFILE%"
+echo Nettoyage du disque dur termine.
+echo Nettoyage du disque dur termine. >> "%LOGFILE%"
 
 :: Effectue une défragmentation du disque dur pour optimiser les performances.
-echo Démarrage de la défragmentation... >> "%LOGFILE%"
+echo Demarrage de la defragmentation...
+echo Demarrage de la defragmentation... >> "%LOGFILE%"
 defrag C: /O >> "%LOGFILE%" 2>&1
-echo Défragmentation terminée. >> "%LOGFILE%"
+echo Defragmentation terminee.
+echo Defragmentation terminee. >> "%LOGFILE%"
 
 :: Ajoute des informations de fin d'exécution dans le fichier log.
 (
     echo ---------------------------------------------------------------
-    echo Script terminé avec succès.
-    echo %utilisateur% a effectué le nettoyage.
+    echo Script termine avec succes.
+    echo %utilisateur% a effectue le nettoyage.
     echo Date : %DATE%
     echo Heure : %TIME%
     echo ---------------------------------------------------------------
@@ -111,21 +147,20 @@ echo Défragmentation terminée. >> "%LOGFILE%"
 ) >> "%LOGFILE%"
 
 :: Réactive la mise en veille de l'écran et du disque dur.
-echo Réinitialisation des schémas de gestion de l'alimentation... >> "%LOGFILE%"
+echo Reinitialisation des schemas de gestion de l'alimentation...
+echo Reinitialisation des schemas de gestion de l'alimentation... >> "%LOGFILE%"
 powercfg -restoredefaultschemes
-echo Réinitialisation des schémas de gestion de l'alimentation terminée. >> "%LOGFILE%"
-
+echo Reinitialisation des schemas de gestion de l'alimentation terminee.
+echo Reinitialisation des schemas de gestion de l'alimentation terminee. >> "%LOGFILE%"
 
 :: Indique que le script a terminé son exécution.
-echo Le script a terminé son exécution. Consultez le fichier log pour plus de détails.
+echo Le script a termine son execution. Consultez le fichier log pour plus de details.
 
-::redémarre l'ordinateur après 30 secondes pour appliquer les modifications.
-echo Redémarrage >> "%LOGFILE%"
+:: Redémarre l'ordinateur après 30 secondes pour appliquer les modifications.
+echo Redemarrage dans 30 secondes...
+echo Redemarrage >> "%LOGFILE%"
 shutdown /r /f /t 30
-echo Redémarrage de l'ordinateur dans 30 secondes. >> "%LOGFILE%"
+echo Redemarrage de l'ordinateur dans 30 secondes. >> "%LOGFILE%"
 
 :: Fin du script.
 exit /b
-echo [INFO] Script terminé. >> "%LOGFILE%"
-echo Merci d'avoir utilisé le script de nettoyage %USERNAME%. >> "%LOGFILE%"
-
