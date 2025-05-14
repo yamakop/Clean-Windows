@@ -118,4 +118,14 @@ echo Réinitialisation des schémas de gestion de l'alimentation terminée. >> "
 
 :: Indique que le script a terminé son exécution.
 echo Le script a terminé son exécution. Consultez le fichier log pour plus de détails.
-pause
+
+::redémarre l'ordinateur après 30 secondes pour appliquer les modifications.
+echo Redémarrage >> "%LOGFILE%"
+shutdown /r /f /t 30
+echo Redémarrage de l'ordinateur dans 30 secondes. >> "%LOGFILE%"
+
+:: Fin du script.
+exit /b
+echo [INFO] Script terminé. >> "%LOGFILE%"
+echo Merci d'avoir utilisé le script de nettoyage. >> "%LOGFILE%"
+
