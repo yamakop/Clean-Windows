@@ -89,12 +89,12 @@ DOCUMENTATION SCRIPT
    - Possibilité d’annuler avec `CTRL+C` (non recommandé)
 
 ----------------------------------------------------------------------------------------
-
+~~~~
 📂 DOSSIER DE LOGS : `log_script`
    → Tous les résultats de chaque étape sont enregistrés
    → Format : `[NOMPC]_YYYY-MM-DD_HH-MM_nettoyage_log.txt`
    → À lire avec Notepad ou tout éditeur de texte
-
+~~~~
 ----------------------------------------------------------------------------------------
 
 ❗ COMPORTEMENTS AUTOMATIQUES :
