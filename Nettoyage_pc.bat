@@ -12,22 +12,28 @@ if %errorlevel% neq 0 (
     exit /b
 )
 
+:: Définit le nom de l'utilisateur courant.
 set "utilisateur=%USERNAME%"
+
+:: Définit le répertoire où se trouve le script batch.
 set "BATDIR=%~dp0"
+
+:: Définit le répertoire où seront stockés les fichiers log.
 set "LOGDIR=%BATDIR%log_script"
 
+:: Définit le chemin de la clé USB en utilisant la lettre du lecteur où se trouve le script.
+set "USB_DRIVE=%~d0"
+
+:: Redéfinit le répertoire des logs pour qu'il soit sur la clé USB.
+set "LOGDIR=%USB_DRIVE%\log_script"
+
+:: Vérifie si le répertoire des logs existe, sinon le crée.
 if not exist "%LOGDIR%" (
     mkdir "%LOGDIR%"
-    echo [INFO] Dossier log_script créé à : "%LOGDIR%" >> "%LOGDIR%\creation_log.txt"
-) else (
-    echo [INFO] Dossier log_script déjà existant : "%LOGDIR%" >> "%LOGDIR%\creation_log.txt"
 )
 
-for /f "tokens=2 delims=:" %%I in ('ipconfig ^| findstr /i "IPv4"') do set "IP_PC=%%I"
-set "IP_PC=%IP_PC: =%"
-
-set "LOGFILE=%LOGDIR%\%COMPUTERNAME%_%IP_PC%_nettoyage_log.txt"
-echo [INFO] Fichier log principal défini à : "%LOGFILE%" >> "%LOGDIR%\creation_log.txt"
+:: Définit le chemin complet du fichier log avec un nom unique basé sur le nom de l'ordinateur, la date et l'heure.
+set "LOGFILE=%LOGDIR%\%COMPUTERNAME%_%DATE:~6,4%-%DATE:~3,2%-%DATE:~0,2%_%TIME:~0,2%-%TIME:~3,2%_nettoyage_log.txt"
 
 :: Initialise le fichier log avec des informations de base.
 (
