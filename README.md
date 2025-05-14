@@ -31,13 +31,13 @@ DOCUMENTATION SCRIPT
 📍 EMPLACEMENT DU SCRIPT :
     Ce script **doit être placé sur une clé USB**. Il détecte automatiquement la lettre du
     lecteur sur lequel il se trouve pour créer un dossier `log_script` à la racine.
-
-📁 EXEMPLE DE STRUCTURE CLÉ USB :
-    └── Clé_USB\
-        ├── nettoyage_windows.bat
-        ├── README_Utilisation_du_Script.txt
-        └── log_script\
-             └── [Nom_PC]_[AAAA-MM-JJ]_[HH-MM]_nettoyage_log.txt
+~~~
+└── Clé_USB
+    ├── nettoyage_windows.bat
+    ├── README_Utilisation_du_Script.txt
+    └── log_script
+        └── [Nom_PC]_[AAAA-MM-JJ]_[HH-MM]_nettoyage_log.txt
+~~~~
 
 ----------------------------------------------------------------------------------------
 
