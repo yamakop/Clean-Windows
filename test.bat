@@ -31,6 +31,13 @@ set "utilisateur=%USERNAME%"
     echo ---------------------------------------------------------------
 ) > "%LOGFILE%"
 
+:: Désactive la mise en veille de l'écran et du disque dur pour éviter les interruptions pendant le nettoyage.
+echo Désactivation de la mise en veille de l'écran et du disque dur... >> "%LOGFILE%"
+powercfg -change monitor-timeout-ac 0
+powercfg -change disk-timeout-ac 0
+echo Mise en veille de l'écran et du disque dur désactivée. >> "%LOGFILE%"
+
+
 :: Vérifie l'espace disque disponible sur le lecteur C:.
 for /f "tokens=2 delims==" %%F in ('wmic logicaldisk where "DeviceID='C:'" get FreeSpace /value') do set FreeSpace=%%F
 set /a FreeSpaceMB=%FreeSpace:~0,-6%
@@ -67,12 +74,20 @@ ipconfig /flushdns >> "%LOGFILE%" 2>&1
 echo Vidage du cache DNS terminé. >> "%LOGFILE%"
 
 :: Vérifie et répare les fichiers système pour garantir leur intégrité.
-echo Vérification et réparation du système... >> "%LOGFILE%"
-DISM /Online /Cleanup-Image /CheckHealth >> "%LOGFILE%" 2>&1
-DISM /Online /Cleanup-Image /ScanHealth >> "%LOGFILE%" 2>&1
-DISM /Online /Cleanup-Image /RestoreHealth >> "%LOGFILE%" 2>&1
-sfc /scannow >> "%LOGFILE%" 2>&1
-echo Vérification et réparation du système terminées. >> "%LOGFILE%"
+echo Vérification de la connectivité Internet... >> "%LOGFILE%"
+ping -n 1 www.google.com >nul 2>&1
+if %errorlevel% neq 0 (
+    echo [ERREUR] Pas de connexion Internet. Les commandes suivantes pourraient échouer. >> "%LOGFILE%"
+    echo %utilisateur%, veuillez vérifier votre connexion Internet avant de continuer. >> "%LOGFILE%"
+) else (
+    echo [INFO] Connexion Internet détectée. >> "%LOGFILE%"
+    echo Vérification et réparation du système... >> "%LOGFILE%"
+    DISM /Online /Cleanup-Image /CheckHealth >> "%LOGFILE%" 2>&1
+    DISM /Online /Cleanup-Image /ScanHealth >> "%LOGFILE%" 2>&1
+    DISM /Online /Cleanup-Image /RestoreHealth >> "%LOGFILE%" 2>&1
+    sfc /scannow >> "%LOGFILE%" 2>&1
+    echo Vérification et réparation du système terminées. >> "%LOGFILE%"
+)
 
 :: Lance le nettoyage du disque dur pour supprimer les fichiers inutiles.
 echo Nettoyage du disque dur... >> "%LOGFILE%"
@@ -94,6 +109,12 @@ echo Défragmentation terminée. >> "%LOGFILE%"
     echo ---------------------------------------------------------------
     echo ================================================================
 ) >> "%LOGFILE%"
+
+:: Réactive la mise en veille de l'écran et du disque dur.
+echo Réinitialisation des schémas de gestion de l'alimentation... >> "%LOGFILE%"
+powercfg -restoredefaultschemes
+echo Réinitialisation des schémas de gestion de l'alimentation terminée. >> "%LOGFILE%"
+
 
 :: Indique que le script a terminé son exécution.
 echo Le script a terminé son exécution. Consultez le fichier log pour plus de détails.
