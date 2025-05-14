@@ -1,6 +1,9 @@
+
+DOCUMENTATION SCRIPT
 ========================================================================================
-                     📘 DOCUMENT D’UTILISATION DU SCRIPT DE MAINTENANCE WINDOWS
-========================================================================================
+
+
+
 
 🗂 NOM DU SCRIPT :
     nettoyage_windows.bat
