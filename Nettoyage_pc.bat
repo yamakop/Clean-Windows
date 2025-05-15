@@ -25,6 +25,15 @@ set "BATDIR=%~dp0"
 set "USB_DRIVE=%~d0"
 set "LOGDIR=%USB_DRIVE%\log_script"
 
+:: Suppression des fichiers de log plus vieux que 4 jours.
+echo Suppression des fichiers de log plus vieux que 4 jours...
+echo Suppression des fichiers de log plus vieux que 4 jours... %TIME%. >> "%LOGFILE%"
+forfiles /p "%LOGDIR%" /m *.log /d -4 /c "cmd /c del /q @path"  >> "%LOGFILE%" 2>&1
+echo Suppression des fichiers de log terminée. >> "%LOGFILE%"
+echo Suppression des fichiers de log terminée.
+
+
+
 :: Création du répertoire des logs si inexistant.
 if not exist "%LOGDIR%" mkdir "%LOGDIR%"
 
@@ -50,10 +59,10 @@ set "LOGFILE=%LOGDIR%\%COMPUTERNAME%_%DATE:~6,4%-%DATE:~3,2%-%DATE:~0,2%_%TIME:~
 :: Désactivation de la mise en veille
 :: =====================================================================
 echo Désactivation de la mise en veille de l'écran et du disque dur...
-echo Désactivation de la mise en veille de l'écran et du disque dur... >> "%LOGFILE%"
+echo Désactivation de la mise en veille de l'écran et du disque dur... %TIME%. >> "%LOGFILE%"
 powercfg -change monitor-timeout-ac 0
 powercfg -change disk-timeout-ac 0
-echo Mise en veille désactivée. >> "%LOGFILE%"
+echo Mise en veille désactivée %TIME%. >> "%LOGFILE%"
 
 :: =====================================================================
 :: Vérification de l'espace disque
